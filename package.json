@@ -1,0 +1,18 @@
+{
+  "name": "tricity-shelter-triage",
+  "version": "1.0.0",
+  "description": "Intake triage widget backend for Tri-City Animal Shelter prototype",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

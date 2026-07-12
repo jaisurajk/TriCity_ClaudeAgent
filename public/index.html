@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tri-City Animal Shelter — Intake Triage</title>
+<style>
+  :root{
+    --paper: #F1EFE6;
+    --paper-dim: #E7E3D5;
+    --ink: #232B26;
+    --ink-soft: #5A6259;
+    --line: #C9C2AC;
+    --municipal: #2C4A52;
+    --municipal-dim: #3E6470;
+    --marigold: #D9922B;
+    --coral: #C1462F;
+    --sage: #6E8F6B;
+    --card: #FBFAF5;
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; padding: 24px; background: #E9E5D6; }
+  .tc-mono{font-family:'IBM Plex Mono', 'Courier New', monospace;}
+  .tc-condensed{font-family:'Barlow Condensed','Arial Narrow',sans-serif; letter-spacing:0.04em;}
+
+  .tc-root{
+    font-family: 'IBM Plex Sans', 'Inter', Arial, sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    max-width: 980px;
+    margin: 0 auto;
+    overflow: hidden;
+  }
+
+  .tc-header{
+    background: var(--municipal);
+    color: var(--paper);
+    padding: 18px 24px;
+    display:flex; align-items:center; justify-content:space-between;
+    border-bottom: 3px solid var(--marigold);
+  }
+  .tc-header-title{
+    font-family:'Barlow Condensed', Arial, sans-serif;
+    font-weight:700;
+    font-size: 22px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+  .tc-header-sub{
+    font-size: 12px;
+    color: #C9D8DB;
+    margin-top:2px;
+    letter-spacing: 0.02em;
+  }
+  .tc-ticket-badge{
+    font-family:'IBM Plex Mono', monospace;
+    font-size: 12px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.25);
+    padding: 4px 10px;
+    border-radius: 3px;
+    color: #E7E3D5;
+  }
+
+  .tc-disclaimer{
+    background: var(--marigold);
+    color: #2A1E08;
+    font-size: 12px;
+    padding: 8px 24px;
+    line-height:1.5;
+  }
+
+  .tc-body{
+    display:grid;
+    grid-template-columns: 220px 1fr;
+    min-height: 520px;
+  }
+  @media (max-width: 680px){
+    .tc-body{ grid-template-columns: 1fr; }
+    .tc-sidebar{ display:flex; flex-wrap:wrap; gap:6px; border-right:none; border-bottom:1px solid var(--line);}
+  }
+
+  .tc-sidebar{
+    background: var(--paper-dim);
+    border-right: 1px solid var(--line);
+    padding: 16px;
+  }
+  .tc-sidebar-label{
+    font-family:'Barlow Condensed', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--ink-soft);
+    margin-bottom: 10px;
+  }
+  .tc-quickbtn{
+    display:block;
+    width:100%;
+    text-align:left;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 9px 10px;
+    font-size: 13px;
+    color: var(--ink);
+    margin-bottom: 6px;
+    cursor:pointer;
+    transition: border-color .15s ease, transform .1s ease;
+  }
+  .tc-quickbtn:hover{ border-color: var(--municipal); transform: translateX(2px); }
+
+  .tc-stats{
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px dashed var(--line);
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  .tc-stats-row{ display:flex; justify-content:space-between; margin-bottom:4px; }
+  .tc-stats-val{ font-family:'IBM Plex Mono', monospace; color: var(--ink); }
+
+  .tc-main{
+    display:flex; flex-direction:column;
+    padding: 18px 20px;
+  }
+  .tc-log{
+    flex:1;
+    overflow-y:auto;
+    max-height: 460px;
+    padding-right: 4px;
+  }
+  .tc-empty{
+    color: var(--ink-soft);
+    font-size: 13px;
+    padding: 30px 10px;
+    text-align:center;
+    border: 1px dashed var(--line);
+    border-radius: 4px;
+  }
+
+  .tc-card{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    position: relative;
+  }
+  .tc-card-user{
+    background: var(--paper-dim);
+  }
+  .tc-card-role{
+    font-family:'Barlow Condensed', sans-serif;
+    font-size: 11px;
+    text-transform:uppercase;
+    letter-spacing:0.08em;
+    color: var(--ink-soft);
+    margin-bottom: 4px;
+  }
+  .tc-card-text{
+    font-size: 14px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+  }
+
+  .tc-stamp{
+    display:inline-block;
+    font-family:'Barlow Condensed', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    padding: 3px 9px;
+    border: 2px solid currentColor;
+    border-radius: 3px;
+    transform: rotate(-2deg);
+    margin-bottom: 8px;
+  }
+  .tc-stamp-resolved{ color: var(--sage); }
+  .tc-stamp-queued{ color: var(--marigold); }
+  .tc-stamp-urgent{ color: var(--coral); transform: rotate(-3deg) scale(1.03); }
+
+  .tc-inputrow{
+    display:flex;
+    gap:8px;
+    margin-top: 12px;
+    border-top: 1px solid var(--line);
+    padding-top: 12px;
+  }
+  .tc-input{
+    flex:1;
+    border: 1px solid var(--line);
+    border-radius: 3px;
+    padding: 10px 12px;
+    font-size: 14px;
+    font-family: inherit;
+    background: var(--card);
+    color: var(--ink);
+  }
+  .tc-input:focus{ outline: 2px solid var(--municipal); outline-offset: 1px; }
+  .tc-send{
+    background: var(--municipal);
+    color: var(--paper);
+    border:none;
+    border-radius: 3px;
+    padding: 0 18px;
+    font-family:'Barlow Condensed', sans-serif;
+    font-weight:700;
+    letter-spacing:0.05em;
+    text-transform:uppercase;
+    font-size: 13px;
+    cursor:pointer;
+  }
+  .tc-send:hover{ background: var(--municipal-dim); }
+  .tc-send:disabled{ opacity:0.5; cursor:not-allowed; }
+
+  .tc-typing{
+    font-size:12px; color: var(--ink-soft); font-style: italic;
+    padding: 4px 0 0 2px;
+  }
+</style>
+</head>
+<body>
+
+<div class="tc-root">
+  <div class="tc-header">
+    <div>
+      <div class="tc-header-title">Tri-City Animal Shelter</div>
+      <div class="tc-header-sub">Intake Triage — Ask Us Anything</div>
+    </div>
+    <div class="tc-ticket-badge tc-mono" id="tc-ticket-counter">TICKET #0001</div>
+  </div>
+
+  <div class="tc-disclaimer">
+    <strong>Prototype demo.</strong> Shelter info is placeholder — swap in real hours, fees and policies before use. Not for emergencies: if an animal is in immediate danger, call the shelter directly or 911.
+  </div>
+
+  <div class="tc-body">
+    <div class="tc-sidebar">
+      <div class="tc-sidebar-label">Quick Questions</div>
+      <button class="tc-quickbtn" data-q="What are your adoption hours?">Adoption hours</button>
+      <button class="tc-quickbtn" data-q="I found a stray dog, what should I do?">Found an animal</button>
+      <button class="tc-quickbtn" data-q="I lost my cat, how do I report it?">Lost my pet</button>
+      <button class="tc-quickbtn" data-q="I need to surrender my dog, what's the process?">Surrender a pet</button>
+      <button class="tc-quickbtn" data-q="How do I become a volunteer?">Volunteering</button>
+      <button class="tc-quickbtn" data-q="Do I need to license my dog?">Dog licensing</button>
+
+      <div class="tc-stats">
+        <div class="tc-stats-row"><span>Resolved</span><span class="tc-stats-val" id="tc-stat-resolved">0</span></div>
+        <div class="tc-stats-row"><span>Queued</span><span class="tc-stats-val" id="tc-stat-queued">0</span></div>
+        <div class="tc-stats-row"><span>Urgent</span><span class="tc-stats-val" id="tc-stat-urgent">0</span></div>
+      </div>
+    </div>
+
+    <div class="tc-main">
+      <div class="tc-log" id="tc-log">
+        <div class="tc-empty">No tickets yet. Ask a question or pick one from the left.</div>
+      </div>
+      <div class="tc-typing" id="tc-typing" style="visibility:hidden;">Staff assistant is drafting a response…</div>
+      <div class="tc-inputrow">
+        <input class="tc-input" id="tc-input" type="text" placeholder="Type a question…" />
+        <button class="tc-send" id="tc-send">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  // Same local emergency catch as the prototype — no need to round-trip to the
+  // server for obvious emergencies.
+  const URGENT_KEYWORDS = [
+    'bite','bit me','attacked','attacking','aggressive','hit by a car','hit by car',
+    'hbc','bleeding','dying','seizure','unconscious','not breathing','emergency','can\'t breathe',
+    'struck by a vehicle','run over'
+  ];
+
+  let ticketNum = 1;
+  let stats = { resolved: 0, queued: 0, urgent: 0 };
+
+  const log = document.getElementById('tc-log');
+  const input = document.getElementById('tc-input');
+  const sendBtn = document.getElementById('tc-send');
+  const typing = document.getElementById('tc-typing');
+  const ticketCounterEl = document.getElementById('tc-ticket-counter');
+
+  function updateStats(){
+    document.getElementById('tc-stat-resolved').textContent = stats.resolved;
+    document.getElementById('tc-stat-queued').textContent = stats.queued;
+    document.getElementById('tc-stat-urgent').textContent = stats.urgent;
+  }
+
+  function clearEmptyState(){
+    const empty = log.querySelector('.tc-empty');
+    if(empty) empty.remove();
+  }
+
+  function addUserCard(text){
+    clearEmptyState();
+    const div = document.createElement('div');
+    div.className = 'tc-card tc-card-user';
+    div.innerHTML = `<div class="tc-card-role">Incoming — Ticket #${String(ticketNum).padStart(4,'0')}</div><div class="tc-card-text"></div>`;
+    div.querySelector('.tc-card-text').textContent = text;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function addReplyCard(status, text){
+    const div = document.createElement('div');
+    div.className = 'tc-card';
+    const stampClass = status === 'urgent' ? 'tc-stamp-urgent' : (status === 'queued' ? 'tc-stamp-queued' : 'tc-stamp-resolved');
+    const stampLabel = status === 'urgent' ? 'Urgent — Call Now' : (status === 'queued' ? 'Queued for Staff' : 'Resolved');
+    div.innerHTML = `
+      <div class="tc-stamp ${stampClass}">${stampLabel}</div>
+      <div class="tc-card-role">Shelter Assistant</div>
+      <div class="tc-card-text"></div>
+    `;
+    div.querySelector('.tc-card-text').textContent = text;
+    log.appendChild(div);
+    log.scrollTop = log.scrollHeight;
+
+    stats[status] = (stats[status] || 0) + 1;
+    updateStats();
+
+    ticketNum += 1;
+    ticketCounterEl.textContent = `TICKET #${String(ticketNum).padStart(4,'0')}`;
+  }
+
+  function checkKeywordUrgent(text){
+    const lower = text.toLowerCase();
+    return URGENT_KEYWORDS.some(k => lower.includes(k));
+  }
+
+  async function handleSend(text){
+    if(!text.trim()) return;
+    input.value = '';
+    sendBtn.disabled = true;
+    addUserCard(text);
+
+    if(checkKeywordUrgent(text)){
+      addReplyCard('urgent', "This sounds urgent. Please don't wait for an email reply — call the shelter's after-hours line or animal control dispatch right now so someone can help immediately.");
+      sendBtn.disabled = false;
+      return;
+    }
+
+    typing.style.visibility = 'visible';
+    try{
+      const response = await fetch('/api/triage', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text })
+      });
+
+      if(!response.ok){
+        const errBody = await response.json().catch(() => ({}));
+        throw new Error(errBody.error || `Server responded with ${response.status}`);
+      }
+
+      const data = await response.json();
+      const status = ['resolved','queued','urgent'].includes(data.status) ? data.status : 'queued';
+      addReplyCard(status, data.reply || "We've logged this for staff follow-up.");
+    }catch(err){
+      console.error('Triage widget error:', err);
+      addReplyCard('queued', "We couldn't process this automatically (error: " + (err && err.message ? err.message : 'unknown') + "). It's been logged for a staff member to follow up on.");
+    }finally{
+      typing.style.visibility = 'hidden';
+      sendBtn.disabled = false;
+    }
+  }
+
+  sendBtn.addEventListener('click', () => handleSend(input.value));
+  input.addEventListener('keydown', (e) => { if(e.key === 'Enter') handleSend(input.value); });
+
+  document.querySelectorAll('.tc-quickbtn').forEach(btn => {
+    btn.addEventListener('click', () => handleSend(btn.dataset.q));
+  });
+})();
+</script>
+</body>
+</html>
