@@ -95,6 +95,11 @@ npm start
 
 Then open http://localhost:3000 in your browser.
 
+<img width="1508" height="770" alt="Screenshot 2026-07-11 at 11 52 35 PM" src="https://github.com/user-attachments/assets/bf5c16c1-cfab-4dc5-97cc-36a0cb246839" />
+<img width="1669" height="788" alt="Screenshot 2026-07-11 at 11 52 40 PM" src="https://github.com/user-attachments/assets/91ba32d6-ab4b-4fa0-8ffe-6563b1bd83e2" />
+<img width="1502" height="813" alt="Screenshot 2026-07-11 at 11 52 46 PM" src="https://github.com/user-attachments/assets/c3b285e7-b1f9-4ef9-b563-39d78d93da8e" />
+
+
 ## 3. Deploy it somewhere public
 
 Any Node host works. Two easy options:
