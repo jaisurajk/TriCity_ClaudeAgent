@@ -1,3 +1,5 @@
+https://tri-city-claude-agent-7tubkkrxl-jaisurajs-projects.vercel.app/
+
 # Tri-City Animal Shelter — Intake Triage
 
 An AI-powered triage tool for a small city-run animal shelter's public inbox,
@@ -102,22 +104,25 @@ Then open http://localhost:3000 in your browser.
 
 ## 3. Deploy it somewhere public
 
-Any Node host works. Two easy options:
+This project can be deployed publicly on **Vercel** so anyone can open the
+widget from their own device. The frontend is served from `public/index.html`,
+and the Express backend keeps the API key server-side.
 
-**Render (render.com)**
-1. Fork my GitHub repo.
-2. New → Web Service → connect the repo.
-3. Build command: `npm install`. Start command: `npm start`.
-4. Add environment variables matching your `.env` (`AI_PROVIDER` plus the
-   key/model pair for whichever provider you're using).
-5. Deploy — you'll get a public URL.
+**Vercel (vercel.com)**
+1. Fork or import this GitHub repo into Vercel.
+2. Create a new Vercel project from the repo.
+3. In **Settings → Environment Variables**, add:
+   - `AI_PROVIDER`
+   - `API_KEY`
+   - `MODEL`
+   In the '.env' file format
+4. Deploy the project. Vercel will provide a public URL.
+5. If you add or change environment variables after the first deploy,
+   redeploy the project so the new values are available at runtime.
 
-**Railway (railway.app)**
-1. New Project → Deploy from forked GitHub repo.
-2. Add the same variables under Variables.
-3. Railway auto-detects the Node app and deploys it.
+Never commit your `.env` file or hardcode any key in `server.js` — always
 
-<img width="1411" height="879" alt="Screenshot 2026-07-14 at 6 58 37 PM" src="https://github.com/user-attachments/assets/fe1d84d8-fa37-4d79-9345-6f3f520732d9" />
+<img width="1487" height="750" alt="Screenshot 2026-07-14 at 7 32 58 PM" src="https://github.com/user-attachments/assets/982502fc-d235-4fce-9afd-64664f7f085c" />
 
 Either way: never commit your `.env` file or hardcode any key in
 `server.js` — always set it as an environment variable on the host.
