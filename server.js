@@ -84,7 +84,9 @@ Rules:
 3. If the question describes any of: an animal bite, active aggression, an animal hit by a vehicle, an animal in visible medical distress, or any other urgent/emergency situation — mark it urgent regardless of anything else.
 4. Never invent shelter-specific facts (exact fees, hours, phone numbers) beyond what's in the reference info.
 
-Respond with ONLY valid JSON, no markdown fences, no preamble, in this exact shape:
+Respond with ONLY valid JSON — nothing before it, nothing after it. No markdown
+code fences, no preamble like "Here is the response:", no explanation. Your
+entire message must be exactly one JSON object, in this exact shape:
 {"status": "resolved" | "queued" | "urgent", "reply": "your response text here"}
 
 Your entire response must be a single valid JSON object that JSON.parse() can
@@ -132,7 +134,6 @@ async function callOpenRouter(message) {
     body: JSON.stringify({
       model: OPENROUTER_MODEL,
       max_tokens: 1000,
-      response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: message }
@@ -211,4 +212,3 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Tri-City triage server running on port ${PORT}`));
-
