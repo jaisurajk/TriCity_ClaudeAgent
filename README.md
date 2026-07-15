@@ -105,7 +105,7 @@ Then open http://localhost:3000 in your browser.
 Any Node host works. Two easy options:
 
 **Render (render.com)**
-1. Push this folder to a GitHub repo.
+1. Fork my GitHub repo.
 2. New → Web Service → connect the repo.
 3. Build command: `npm install`. Start command: `npm start`.
 4. Add environment variables matching your `.env` (`AI_PROVIDER` plus the
@@ -113,9 +113,11 @@ Any Node host works. Two easy options:
 5. Deploy — you'll get a public URL.
 
 **Railway (railway.app)**
-1. New Project → Deploy from GitHub repo.
+1. New Project → Deploy from forked GitHub repo.
 2. Add the same variables under Variables.
 3. Railway auto-detects the Node app and deploys it.
+
+<img width="1411" height="879" alt="Screenshot 2026-07-14 at 6 58 37 PM" src="https://github.com/user-attachments/assets/fe1d84d8-fa37-4d79-9345-6f3f520732d9" />
 
 Either way: never commit your `.env` file or hardcode any key in
 `server.js` — always set it as an environment variable on the host.
