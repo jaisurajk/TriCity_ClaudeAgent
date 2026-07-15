@@ -151,10 +151,12 @@ async function callAnthropic(message) {
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: ANTHROPIC_MODEL,
+      model: OPENROUTER_MODEL,
       max_tokens: 300,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: message }]
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: message }
+      ]
     })
   });
 
