@@ -113,7 +113,7 @@ async function callOpenRouter(message) {
     },
     body: JSON.stringify({
       model: OPENROUTER_MODEL,
-      max_tokens: 1000,
+      max_tokens: 300,
       response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
@@ -142,7 +142,7 @@ async function callAnthropic(message) {
     },
     body: JSON.stringify({
       model: ANTHROPIC_MODEL,
-      max_tokens: 1000,
+      max_tokens: 300,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: message }]
     })
