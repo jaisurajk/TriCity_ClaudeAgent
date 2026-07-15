@@ -1,5 +1,3 @@
-https://tri-city-claude-agent-7tubkkrxl-jaisurajs-projects.vercel.app/
-
 # Tri-City Animal Shelter — Intake Triage
 
 An AI-powered triage tool for a small city-run animal shelter's public inbox,
