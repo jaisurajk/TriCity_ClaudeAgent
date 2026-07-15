@@ -95,7 +95,18 @@ Reference info:
 ${KB}`;
 
 function cleanJson(raw) {
-  return (raw || '').replace(/^```json/i, '').replace(/^```/, '').replace(/```$/, '').trim();
+  const text = (raw || '').trim();
+
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+  if (fenced) return fenced[1].trim();
+
+  const firstBrace = text.indexOf('{');
+  const lastBrace = text.lastIndexOf('}');
+  if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+    return text.slice(firstBrace, lastBrace + 1).trim();
+  }
+
+  return text;
 }
 
 function normalizeResult(parsed) {
