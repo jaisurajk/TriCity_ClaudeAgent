@@ -114,7 +114,6 @@ async function callOpenRouter(message) {
     body: JSON.stringify({
       model: OPENROUTER_MODEL,
       max_tokens: 300,
-      response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: message }
