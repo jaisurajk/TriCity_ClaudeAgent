@@ -87,6 +87,11 @@ Rules:
 Respond with ONLY valid JSON, no markdown fences, no preamble, in this exact shape:
 {"status": "resolved" | "queued" | "urgent", "reply": "your response text here"}
 
+Your entire response must be a single valid JSON object that JSON.parse() can
+parse without error. If your reply text needs to include a quotation mark,
+escape it properly (\\") — or better, avoid quoting phrases from the
+reference info verbatim and paraphrase instead.
+
 - status "resolved": you fully answered from the reference info.
 - status "queued": the question is reasonable but needs a staff member (not covered by reference info, or needs case-specific judgment). In "reply", write a short, friendly holding message telling the person their question has been logged for staff and roughly what to expect next — do not fabricate an answer.
 - status "urgent": emergency situation. In "reply", tell the person clearly and calmly to contact the shelter's after-hours/emergency line or animal control dispatch directly rather than waiting on chat/email, and briefly say why (their safety / the animal's).
@@ -109,69 +114,7 @@ function cleanJson(raw) {
   return text;
 }
 
-function hasAny(text, keywords) {
-  return keywords.some((keyword) => text.includes(keyword));
-}
 
-function localTriage(message) {
-  const text = message.toLowerCase();
-
-  if (hasAny(text, [
-    'bite', 'bit me', 'attacked', 'attacking', 'aggressive', 'hit by a car',
-    'hit by car', 'hbc', 'bleeding', 'dying', 'seizure', 'unconscious',
-    'not breathing', 'emergency', "can't breathe", 'struck by a vehicle',
-    'run over', 'medical distress'
-  ])) {
-    return {
-      status: 'urgent',
-      reply: "This sounds urgent. Please contact the shelter's after-hours line or animal control dispatch right away rather than waiting on chat or email, so staff can help keep you and the animal safe."
-    };
-  }
-
-  if (hasAny(text, ['adoption', 'adopt', 'hours', 'fee', 'fees', 'meet-and-greet', 'meet and greet'])) {
-    return {
-      status: 'resolved',
-      reply: 'Adoption hours are Tuesday through Saturday, 11am to 5pm. The shelter is closed Sunday, Monday, and city holidays. Adoption fees are $85 for dogs and $65 for cats, including spay/neuter, microchip, and first vaccines.'
-    };
-  }
-
-  if (hasAny(text, ['surrender', 'rehome', 'give up my', 'give up a', 'turn in my', 'turn in a'])) {
-    return {
-      status: 'resolved',
-      reply: 'Owner surrenders are by appointment only because kennel space is limited. Bring vaccination records if you have them, and expect to complete a rehoming questionnaire. A surrender fee may apply, though fee waivers may be available in some cases.'
-    };
-  }
-
-  if (hasAny(text, ['found', 'stray', 'loose dog', 'loose cat'])) {
-    return {
-      status: 'resolved',
-      reply: 'If you found an animal, do not chase or corner it if it seems scared. Note the exact location and time found, check for a collar or tag if it is safe, and contact the shelter so they can scan for a microchip or help you file a found report.'
-    };
-  }
-
-  if (hasAny(text, ['lost', 'missing', 'last seen'])) {
-    return {
-      status: 'resolved',
-      reply: 'File a lost-pet report with a photo and the last-seen location and time. If possible, check the shelter in person too, because online photos may not always be fully up to date.'
-    };
-  }
-
-  if (hasAny(text, ['license', 'licensing', 'rabies'])) {
-    return {
-      status: 'resolved',
-      reply: 'Dogs over 4 months old need an annual license, and proof of current rabies vaccination is required. Licensing can typically be completed online, by mail, or in person at the shelter.'
-    };
-  }
-
-  if (hasAny(text, ['volunteer', 'volunteering', 'orientation'])) {
-    return {
-      status: 'resolved',
-      reply: 'Volunteers must be 18 or older, or 14 or older with a guardian for select programs. An orientation session is required before starting, and common roles include dog walking, cat socialization, front-desk support, and adoption events.'
-    };
-  }
-
-  return null;
-}
 
 function normalizeResult(parsed) {
   const status = ['resolved', 'queued', 'urgent'].includes(parsed && parsed.status) ? parsed.status : 'queued';
@@ -188,7 +131,8 @@ async function callOpenRouter(message) {
     },
     body: JSON.stringify({
       model: OPENROUTER_MODEL,
-      max_tokens: 300,
+      max_tokens: 1000,
+      response_format: { type: 'json_object' },
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: message }
@@ -215,12 +159,10 @@ async function callAnthropic(message) {
       'anthropic-version': '2023-06-01'
     },
     body: JSON.stringify({
-      model: OPENROUTER_MODEL,
-      max_tokens: 300,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: message }
-      ]
+      model: ANTHROPIC_MODEL,
+      max_tokens: 1000,
+      system: SYSTEM_PROMPT,
+      messages: [{ role: 'user', content: message }]
     })
   });
 
@@ -254,6 +196,7 @@ app.post('/api/triage', async (req, res) => {
     try {
       parsed = JSON.parse(cleanRaw);
     } catch (e) {
+      console.error('Failed to parse model output as JSON. Raw output was:', cleanRaw);
       parsed = null;
     }
 
@@ -268,3 +211,4 @@ app.get('/health', (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Tri-City triage server running on port ${PORT}`));
+
