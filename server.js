@@ -109,6 +109,70 @@ function cleanJson(raw) {
   return text;
 }
 
+function hasAny(text, keywords) {
+  return keywords.some((keyword) => text.includes(keyword));
+}
+
+function localTriage(message) {
+  const text = message.toLowerCase();
+
+  if (hasAny(text, [
+    'bite', 'bit me', 'attacked', 'attacking', 'aggressive', 'hit by a car',
+    'hit by car', 'hbc', 'bleeding', 'dying', 'seizure', 'unconscious',
+    'not breathing', 'emergency', "can't breathe", 'struck by a vehicle',
+    'run over', 'medical distress'
+  ])) {
+    return {
+      status: 'urgent',
+      reply: "This sounds urgent. Please contact the shelter's after-hours line or animal control dispatch right away rather than waiting on chat or email, so staff can help keep you and the animal safe."
+    };
+  }
+
+  if (hasAny(text, ['adoption', 'adopt', 'hours', 'fee', 'fees', 'meet-and-greet', 'meet and greet'])) {
+    return {
+      status: 'resolved',
+      reply: 'Adoption hours are Tuesday through Saturday, 11am to 5pm. The shelter is closed Sunday, Monday, and city holidays. Adoption fees are $85 for dogs and $65 for cats, including spay/neuter, microchip, and first vaccines.'
+    };
+  }
+
+  if (hasAny(text, ['surrender', 'rehome', 'give up my', 'give up a', 'turn in my', 'turn in a'])) {
+    return {
+      status: 'resolved',
+      reply: 'Owner surrenders are by appointment only because kennel space is limited. Bring vaccination records if you have them, and expect to complete a rehoming questionnaire. A surrender fee may apply, though fee waivers may be available in some cases.'
+    };
+  }
+
+  if (hasAny(text, ['found', 'stray', 'loose dog', 'loose cat'])) {
+    return {
+      status: 'resolved',
+      reply: 'If you found an animal, do not chase or corner it if it seems scared. Note the exact location and time found, check for a collar or tag if it is safe, and contact the shelter so they can scan for a microchip or help you file a found report.'
+    };
+  }
+
+  if (hasAny(text, ['lost', 'missing', 'last seen'])) {
+    return {
+      status: 'resolved',
+      reply: 'File a lost-pet report with a photo and the last-seen location and time. If possible, check the shelter in person too, because online photos may not always be fully up to date.'
+    };
+  }
+
+  if (hasAny(text, ['license', 'licensing', 'rabies'])) {
+    return {
+      status: 'resolved',
+      reply: 'Dogs over 4 months old need an annual license, and proof of current rabies vaccination is required. Licensing can typically be completed online, by mail, or in person at the shelter.'
+    };
+  }
+
+  if (hasAny(text, ['volunteer', 'volunteering', 'orientation'])) {
+    return {
+      status: 'resolved',
+      reply: 'Volunteers must be 18 or older, or 14 or older with a guardian for select programs. An orientation session is required before starting, and common roles include dog walking, cat socialization, front-desk support, and adoption events.'
+    };
+  }
+
+  return null;
+}
+
 function normalizeResult(parsed) {
   const status = ['resolved', 'queued', 'urgent'].includes(parsed && parsed.status) ? parsed.status : 'queued';
   const reply = (parsed && parsed.reply) || "We've logged this for staff follow-up.";
