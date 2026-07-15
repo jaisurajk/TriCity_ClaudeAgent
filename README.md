@@ -111,11 +111,10 @@ and the Express backend keeps the API key server-side.
 **Vercel (vercel.com)**
 1. Fork or import this GitHub repo into Vercel.
 2. Create a new Vercel project from the repo.
-3. In **Settings → Environment Variables**, add:
+3. In **Settings → Environment Variables**, add in the '.env' file format:
    - `AI_PROVIDER`
    - `API_KEY`
    - `MODEL`
-   In the '.env' file format
 4. Deploy the project. Vercel will provide a public URL.
 5. If you add or change environment variables after the first deploy,
    redeploy the project so the new values are available at runtime.
