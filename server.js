@@ -4,6 +4,12 @@
 // - "anthropic": Claude, paid API (small per-token cost, no free tier).
 // Only the key(s) for whichever provider you're using need to be set.
 
+// Tri-City Animal Shelter — Intake Triage Backend
+// Supports multiple LLM providers, switchable via the AI_PROVIDER env var.
+// - "openrouter" (default): free-tier models, no billing/card required.
+// - "anthropic": Claude, paid API (small per-token cost, no free tier).
+// Only the key(s) for whichever provider you're using need to be set.
+
 import express from 'express';
 import dotenv from 'dotenv';
 import path from 'path';
@@ -37,66 +43,37 @@ if (AI_PROVIDER === 'openrouter' && !process.env.OPENROUTER_API_KEY) {
 
 // ---- Placeholder knowledge base — replace with the shelter's real info ----
 const KB = `
-TRI-CITY ANIMAL SHELTER — REFERENCE INFO (placeholder, replace with real data)
+ADOPTION: Tue-Sat 11am-5pm, closed Sun/Mon/holidays. Fee: $85 dogs, $65 cats (includes spay/neuter, microchip, vaccines). Meet-and-greet recommended before adopting a dog.
 
-ADOPTION
-- Hours: Tue–Sat, 11am–5pm. Closed Sun/Mon and city holidays.
-- Adoption fee: $85 dogs, $65 cats (includes spay/neuter, microchip, first vaccines).
-- Meet-and-greets with resident pets recommended before adopting a dog.
+FOUND AN ANIMAL: Don't chase a scared animal; note location/time found. Free microchip scan at shelter, no appointment. If healthy, file a found report online/by phone; shelter advises on temp care. If injured, hit by car, or in danger: call shelter's after-hours line or animal control now, don't wait for email.
 
-FOUND AN ANIMAL
-- Do not chase or corner a scared animal. Note the exact location and time found.
-- Check for a collar/tag or visible microchip scan (shelter can scan for free, no appointment needed).
-- If the animal is healthy and not in immediate danger, you may hold it and file a "found report" online or by phone; shelter can advise on temporary care.
-- If injured, hit by a car, or in immediate danger: call the shelter's after-hours line or animal control dispatch right away — do not wait for email response.
+LOST PET: File a lost-pet report online/by phone with photo and last-seen location/time. Strays are held a minimum period before adoption eligibility - check within that window. In-person check recommended, online photos may be outdated.
 
-LOST A PET
-- File a lost-pet report online (link) or by phone with a photo and last-seen location/time.
-- Shelter holds stray intakes for a minimum stray hold period (varies by species) before animals become available for adoption — check within that window.
-- Check shelter in person if possible; photos online are not always fully up to date.
+SURRENDER: By appointment only (limited kennel space). Bring vaccination records; rehoming questionnaire required. Fee may apply, waivers possible - ask staff. Mention behavioral/medical issues when scheduling.
 
-SURRENDER
-- Owner surrenders are by appointment only due to limited kennel space.
-- Bring vaccination records if available. A rehoming questionnaire is required.
-- Surrender fee may apply; fee waivers available in some cases — ask staff.
-- If surrender is due to a behavioral or medical issue, mention this when scheduling so the right staff can be present.
+LICENSING: Dogs over 4 months need an annual city license; requires current rabies vaccination proof. Available online, by mail, or in person.
 
-LICENSING
-- City ordinance requires dog licenses annually for dogs over 4 months old.
-- Proof of current rabies vaccination required to license.
-- Licensing can typically be done online, by mail, or in person at the shelter.
+VOLUNTEERING: 18+ (14+ with guardian for some programs). Orientation required before starting. Roles: dog walking, cat socialization, front desk, adoption events.
 
-VOLUNTEERING
-- Volunteers must be 18+ (or 14+ with a guardian for select programs).
-- Orientation session required before starting; sessions run periodically — check current schedule.
-- Common roles: dog walking, cat socialization, front-desk/reception support, adoption events.
-
-EMERGENCIES / URGENT SITUATIONS
-- Animal bites, active aggression, animal hit by a vehicle, or an animal in medical distress are NOT handled by this chat.
-- These should be escalated immediately to shelter staff or animal control dispatch — do not attempt to resolve via chat or email.
+EMERGENCIES: Bites, active aggression, hit-by-vehicle, or medical distress are NOT handled here - escalate immediately to staff or animal control, don't wait on chat/email.
 `;
 
-const SYSTEM_PROMPT = `You are a triage assistant for a small city-run animal shelter's public inbox. You answer ONLY using the reference info provided below.
+const SYSTEM_PROMPT = `You triage a small city animal shelter's public inbox. Answer ONLY from the reference info below.
 
 Rules:
-1. If the question is clearly answered by the reference info, answer concisely and warmly (2-4 sentences), in plain language a member of the public would understand.
-2. If the question is NOT covered by the reference info, or requires judgment calls, specific case details, or staff discretion, do NOT guess. Instead, mark it for staff follow-up.
-3. If the question describes any of: an animal bite, active aggression, an animal hit by a vehicle, an animal in visible medical distress, or any other urgent/emergency situation — mark it urgent regardless of anything else.
-4. Never invent shelter-specific facts (exact fees, hours, phone numbers) beyond what's in the reference info.
+1. If covered by reference info: answer in 2-4 warm, plain-language sentences.
+2. If NOT covered, or needs judgment/case details: don't guess - mark for staff follow-up.
+3. Bite, active aggression, hit-by-vehicle, or medical distress: always mark urgent.
+4. Never invent facts (fees, hours, phone numbers) beyond the reference info.
 
-Respond with ONLY valid JSON — nothing before it, nothing after it. No markdown
-code fences, no preamble like "Here is the response:", no explanation. Your
-entire message must be exactly one JSON object, in this exact shape:
-{"status": "resolved" | "queued" | "urgent", "reply": "your response text here"}
+Respond with ONLY one valid JSON object, nothing else - no markdown fences, no preamble:
+{"status": "resolved" | "queued" | "urgent", "reply": "..."}
 
-Your entire response must be a single valid JSON object that JSON.parse() can
-parse without error. If your reply text needs to include a quotation mark,
-escape it properly (\\") — or better, avoid quoting phrases from the
-reference info verbatim and paraphrase instead.
+If your reply needs a quotation mark, escape it (\\") or paraphrase instead of quoting the reference info verbatim.
 
-- status "resolved": you fully answered from the reference info.
-- status "queued": the question is reasonable but needs a staff member (not covered by reference info, or needs case-specific judgment). In "reply", write a short, friendly holding message telling the person their question has been logged for staff and roughly what to expect next — do not fabricate an answer.
-- status "urgent": emergency situation. In "reply", tell the person clearly and calmly to contact the shelter's after-hours/emergency line or animal control dispatch directly rather than waiting on chat/email, and briefly say why (their safety / the animal's).
+- "resolved": fully answered from reference info.
+- "queued": reasonable question, but needs a staff member. Reply = short friendly holding message, no fabricated answer.
+- "urgent": emergency. Reply = tell them to contact the after-hours/emergency line or animal control directly now, briefly say why.
 
 Reference info:
 ${KB}`;
@@ -133,7 +110,7 @@ async function callOpenRouter(message) {
     },
     body: JSON.stringify({
       model: OPENROUTER_MODEL,
-      max_tokens: 276,
+      max_tokens: 1000,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: message }
@@ -161,7 +138,7 @@ async function callAnthropic(message) {
     },
     body: JSON.stringify({
       model: ANTHROPIC_MODEL,
-      max_tokens: 276,
+      max_tokens: 1000,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: message }]
     })
