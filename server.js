@@ -30,7 +30,7 @@ const AI_PROVIDER = (process.env.AI_PROVIDER || 'openrouter').toLowerCase();
 // provider lineups change over time.
 // - OpenRouter free models: openrouter.ai/models (filter by "Free")
 // - Anthropic models: docs.claude.com
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'meta-llama/llama-3.1-8b-instruct:free';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'poolside/laguna-s-2.1:free';
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
 
 if (AI_PROVIDER === 'openrouter' && !process.env.OPENROUTER_API_KEY) {
@@ -110,7 +110,7 @@ async function callOpenRouter(message) {
     },
     body: JSON.stringify({
       model: OPENROUTER_MODEL,
-      max_tokens: 81,
+      max_tokens: 500,
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         { role: 'user', content: message }
@@ -138,7 +138,7 @@ async function callAnthropic(message) {
     },
     body: JSON.stringify({
       model: ANTHROPIC_MODEL,
-      max_tokens: 81,
+      max_tokens: 500,
       system: SYSTEM_PROMPT,
       messages: [{ role: 'user', content: message }]
     })
