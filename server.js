@@ -30,7 +30,7 @@ const AI_PROVIDER = (process.env.AI_PROVIDER || 'openrouter').toLowerCase();
 // provider lineups change over time.
 // - OpenRouter free models: openrouter.ai/models (filter by "Free")
 // - Anthropic models: docs.claude.com
-const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'poolside/laguna-s-2.1:free';
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || 'google/gemma-4-26b-a4b-it:free';
 const ANTHROPIC_MODEL = process.env.ANTHROPIC_MODEL || 'claude-sonnet-4-6';
 
 if (AI_PROVIDER === 'openrouter' && !process.env.OPENROUTER_API_KEY) {
